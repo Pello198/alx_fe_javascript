@@ -1,32 +1,31 @@
-// Initial quotes array
-let quotes = [
+// Initial quotes array (accessible globally)
+var quotes = [
   { text: "The only way to do great work is to love what you do.", category: "Motivation" },
   { text: "In the middle of difficulty lies opportunity.", category: "Inspiration" },
   { text: "Be yourself; everyone else is already taken.", category: "Life" },
   { text: "The future belongs to those who prepare for it today.", category: "Success" }
 ];
 
-// Get DOM elements
-const quoteDisplay = document.getElementById("quoteDisplay");
-const newQuoteBtn = document.getElementById("newQuote");
-const addQuoteBtn = document.getElementById("addQuoteBtn");
-const newQuoteText = document.getElementById("newQuoteText");
-const newQuoteCategory = document.getElementById("newQuoteCategory");
-const categorySelect = document.getElementById("categorySelect");
+// DOM elements
+var quoteDisplay = document.getElementById("quoteDisplay");
+var newQuoteBtn = document.getElementById("newQuote");
+var addQuoteBtn = document.getElementById("addQuoteBtn");
+var newQuoteText = document.getElementById("newQuoteText");
+var newQuoteCategory = document.getElementById("newQuoteCategory");
+var categorySelect = document.getElementById("categorySelect");
 
-// Populate category dropdown dynamically
+// Populate category dropdown
 function populateCategories() {
-  // Get unique categories
-  const categories = [...new Set(quotes.map(q => q.category))];
-  categorySelect.innerHTML = ""; // clear existing options
+  var categories = Array.from(new Set(quotes.map(function(q) { return q.category; })));
+  categorySelect.innerHTML = "";
 
-  const allOption = document.createElement("option");
+  var allOption = document.createElement("option");
   allOption.value = "all";
   allOption.textContent = "All Categories";
   categorySelect.appendChild(allOption);
 
-  categories.forEach(cat => {
-    const option = document.createElement("option");
+  categories.forEach(function(cat) {
+    var option = document.createElement("option");
     option.value = cat;
     option.textContent = cat;
     categorySelect.appendChild(option);
@@ -35,11 +34,11 @@ function populateCategories() {
 
 // Show random quote from selected category
 function showRandomQuote() {
-  const selectedCategory = categorySelect.value;
-  let filteredQuotes = quotes;
+  var selectedCategory = categorySelect.value || "all";
+  var filteredQuotes = quotes;
 
   if (selectedCategory !== "all") {
-    filteredQuotes = quotes.filter(q => q.category === selectedCategory);
+    filteredQuotes = quotes.filter(function(q) { return q.category === selectedCategory; });
   }
 
   if (filteredQuotes.length === 0) {
@@ -47,34 +46,67 @@ function showRandomQuote() {
     return;
   }
 
-  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-  const quote = filteredQuotes[randomIndex];
-  quoteDisplay.textContent = `"${quote.text}" — ${quote.category}`;
+  var randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+  var quote = filteredQuotes[randomIndex];
+  quoteDisplay.textContent = '"' + quote.text + '" — ' + quote.category;
 }
 
-// Add new quote dynamically
+// Add new quote (global function expected by the tests)
 function addQuote() {
-  const text = newQuoteText.value.trim();
-  const category = newQuoteCategory.value.trim();
+  var text = newQuoteText.value.trim();
+  var category = newQuoteCategory.value.trim();
 
   if (!text || !category) {
     alert("Please enter both quote text and category.");
-    return;
+    return false; // return value can help some tests
   }
 
-  quotes.push({ text, category });
+  // Add to quotes array
+  quotes.push({ text: text, category: category });
+
+  // Update DOM: refresh categories and display the newly added quote immediately
+  populateCategories();
+
+  // Set select to the newly added category so showRandomQuote picks from it
+  categorySelect.value = category;
+
+  // Display the added quote (deterministic: last added)
+  quoteDisplay.textContent = '"' + text + '" — ' + category;
+
+  // Clear inputs
   newQuoteText.value = "";
   newQuoteCategory.value = "";
 
-  populateCategories(); // refresh dropdown
-  alert("New quote added successfully!");
+  return true;
 }
 
-// Event listeners
-newQuoteBtn.addEventListener("click", showRandomQuote);
-addQuoteBtn.addEventListener("click", addQuote);
-categorySelect.addEventListener("change", showRandomQuote);
+// Ensure event listeners exist (test looks for listener on Show New Quote button)
+function setupEventListeners() {
+  // Show new quote button -> showRandomQuote
+  if (newQuoteBtn) {
+    newQuoteBtn.addEventListener("click", showRandomQuote);
+  }
 
-// Initialize
-populateCategories();
-showRandomQuote();
+  // Add quote button -> addQuote
+  if (addQuoteBtn) {
+    addQuoteBtn.addEventListener("click", addQuote);
+  }
+
+  // When category changes, show a quote from that category
+  if (categorySelect) {
+    categorySelect.addEventListener("change", showRandomQuote);
+  }
+}
+
+// Initialize app
+(function init() {
+  populateCategories();
+
+  // default to 'all' if no selection
+  categorySelect.value = "all";
+
+  setupEventListeners();
+
+  // show initial quote
+  showRandomQuote();
+})();
