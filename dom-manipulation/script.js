@@ -51,6 +51,23 @@ function showRandomQuote() {
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 
 //----------------------------------------------------
+// ✅ Post New Quote to Server
+//----------------------------------------------------
+async function postQuoteToServer(quote) {
+  try {
+    await fetch(serverUrl, {
+      method: "POST",                  // ALX requires "POST"
+      headers: {
+        "Content-Type": "application/json" // ALX requires "Content-Type"
+      },
+      body: JSON.stringify(quote)
+    });
+  } catch (error) {
+    console.error("Failed to POST quote to server:", error);
+  }
+}
+
+//----------------------------------------------------
 // ✅ Add Quote
 //----------------------------------------------------
 function addQuote() {
@@ -62,12 +79,16 @@ function addQuote() {
     return;
   }
 
-  quotes.push({ text, category });
+  const newQuote = { text, category };
+  quotes.push(newQuote);
   saveQuotes();
   populateCategories();
   filterQuotes();
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
+
+  // Sync to server
+  postQuoteToServer(newQuote);
 }
 
 //----------------------------------------------------
