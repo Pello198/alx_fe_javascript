@@ -1,7 +1,9 @@
-// Initial quotes array
+// ----------------------------------------------------
+// ✅ Initial Quotes Array
+// ----------------------------------------------------
 let quotes = [
   { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
-  { text: "Don’t let yesterday take up too much of today.", category: "Inspiration" },
+  { text: "Dont let yesterday take up too much of today.", category: "Inspiration" },
   { text: "Your limitation—it’s only your imagination.", category: "Self-Improvement" }
 ];
 
@@ -21,18 +23,7 @@ function loadQuotes() {
 }
 
 //----------------------------------------------------
-// ✅ Show a Random Quote
-//----------------------------------------------------
-function showRandomQuote() {
-  if (quotes.length === 0) return;
-  const random = quotes[Math.floor(Math.random() * quotes.length)];
-  displayQuotes([random]);
-}
-
-document.getElementById("newQuote").addEventListener("click", showRandomQuote);
-
-//----------------------------------------------------
-// ✅ Display Quotes on Screen
+// ✅ Display Quotes
 //----------------------------------------------------
 function displayQuotes(list) {
   const container = document.getElementById("quoteDisplay");
@@ -49,7 +40,18 @@ function displayQuotes(list) {
 }
 
 //----------------------------------------------------
-// ✅ Add a New Quote
+// ✅ Show Random Quote
+//----------------------------------------------------
+function showRandomQuote() {
+  if (quotes.length === 0) return;
+  const random = quotes[Math.floor(Math.random() * quotes.length)];
+  displayQuotes([random]);
+}
+
+document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+
+//----------------------------------------------------
+// ✅ Add Quote
 //----------------------------------------------------
 function addQuote() {
   const text = document.getElementById("newQuoteText").value.trim();
@@ -63,7 +65,7 @@ function addQuote() {
   quotes.push({ text, category });
   saveQuotes();
   populateCategories();
-  displayQuotes(quotes.filter(q => q.category === category));
+  filterQuotes();
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
 }
@@ -84,7 +86,7 @@ function populateCategories() {
 }
 
 //----------------------------------------------------
-// ✅ Filter Quotes by Category
+// ✅ Filter Quotes
 //----------------------------------------------------
 function filterQuotes() {
   const selected = document.getElementById("categoryFilter").value;
@@ -94,7 +96,7 @@ function filterQuotes() {
 }
 
 //----------------------------------------------------
-// ✅ JSON Export
+// ✅ Export JSON
 //----------------------------------------------------
 function exportToJson() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
@@ -107,7 +109,7 @@ function exportToJson() {
 }
 
 //----------------------------------------------------
-// ✅ JSON Import
+// ✅ Import JSON
 //----------------------------------------------------
 function importFromJsonFile(event) {
   const reader = new FileReader();
@@ -117,7 +119,7 @@ function importFromJsonFile(event) {
       quotes.push(...imported);
       saveQuotes();
       populateCategories();
-      displayQuotes(quotes);
+      filterQuotes();
       alert("Quotes imported successfully!");
     } catch {
       alert("Invalid JSON file.");
@@ -127,13 +129,12 @@ function importFromJsonFile(event) {
 }
 
 //----------------------------------------------------
-// ✅ Simulate Server Sync
+// ✅ Server Sync
 //----------------------------------------------------
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(serverUrl);
     const data = await response.json();
-    // Convert to your format
     return data.slice(0, 5).map(item => ({
       text: item.title,
       category: "Server"
@@ -177,17 +178,34 @@ function notify(msg) {
 }
 
 //----------------------------------------------------
+// ✅ Create Add Quote Form (required by ALX)
+//----------------------------------------------------
+function createAddQuoteForm() {
+  const container = document.getElementById("addQuoteContainer");
+  if (!container) return;
+
+  container.innerHTML = `
+    <h3>Add a New Quote</h3>
+    <input type="text" id="newQuoteText" placeholder="Enter quote" /><br><br>
+    <input type="text" id="newQuoteCategory" placeholder="Enter category" /><br><br>
+    <button id="addQuoteButton">Add Quote</button>
+  `;
+
+  document.getElementById("addQuoteButton").addEventListener("click", addQuote);
+}
+
+//----------------------------------------------------
 // ✅ Initialize App
 //----------------------------------------------------
 window.onload = function () {
   loadQuotes();
   populateCategories();
+  createAddQuoteForm();
 
   const savedCategory = localStorage.getItem("selectedCategory") || "all";
   document.getElementById("categoryFilter").value = savedCategory;
   filterQuotes();
 
-  // Periodic server sync every 60 seconds
   syncWithServer();
   setInterval(syncWithServer, 60000);
 };
