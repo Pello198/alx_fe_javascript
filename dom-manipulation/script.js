@@ -172,7 +172,8 @@ function mergeQuotes(local, server) {
   return [...server, ...uniqueLocal]; // Server takes precedence
 }
 
-async function syncWithServer() {
+// Rename function to match ALX requirement
+async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
   if (serverQuotes.length === 0) return;
 
@@ -227,6 +228,6 @@ window.onload = function () {
   document.getElementById("categoryFilter").value = savedCategory;
   filterQuotes();
 
-  syncWithServer();
-  setInterval(syncWithServer, 60000);
+  syncQuotes();
+  setInterval(syncQuotes, 60000);
 };
