@@ -183,7 +183,7 @@ async function syncQuotes() {
   if (JSON.stringify(merged) !== JSON.stringify(localQuotes)) {
     quotes = merged;
     saveQuotes();
-    notify("Quotes updated from server!");
+    notify("Quotes synced with server!");
     populateCategories();
     filterQuotes();
   }
